@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import { evaluate } from 'mathjs'
 import './App.css'
+import { Box, Button, Grid, Paper, Typography } from '@mui/material'
+import { KEYS } from './constants'
 
 function App() {
   const [input, setInput] = useState('')
   const [total, setTotal] = useState(0)
   const [operation, setOperation] = useState('')
-
-  const numbers = Array(10)
-    .fill(0)
-    .map((n, i) => i.toString())
-  numbers.push('.')
 
   const handleInput = (n: string) => {
     if (input === '0' && n !== '.') {
@@ -76,24 +73,60 @@ function App() {
   }
 
   return (
-    <>
-      <div>
-        <input value={input} />
-        {numbers.map((n) => {
-          return <button onClick={() => handleInput(n)}>{n}</button>
-        })}
-
-        {['+', '-', '/', 'x', '='].map((op) => (
-          <button onClick={() => handleOperation(op)}>{op}</button>
+    <Paper elevation={3} sx={{ padding: 2, maxWidth: 300, margin: '0 auto' }}>
+      <Box mb={2} color={'grey'}>
+        <Typography variant="h5" sx={{ textAlign: 'right' }}>
+          {input || '0'}
+        </Typography>
+        <Typography variant="body2" sx={{ flexGrow: 1, textAlign: 'right' }}>
+          {total === 0 ? '0' : total + operation}
+        </Typography>
+      </Box>
+      <Grid container spacing={1}>
+        {KEYS.map((n) => (
+          <Grid item xs={4} key={n}>
+            <Button
+              onClick={() => handleInput(n)}
+              variant="contained"
+              fullWidth
+            >
+              {n}
+            </Button>
+          </Grid>
         ))}
-        <button onClick={handleDelete}>DEL</button>
-        <button onClick={handleClear}>CLEAR</button>
-      </div>
 
-      <div>
-        <span>{total !== 0 && total + ' ' + operation}</span>
-      </div>
-    </>
+        <Grid item xs={4}>
+          <Button
+            onClick={() => handleOperation('=')}
+            variant="contained"
+            fullWidth
+          >
+            =
+          </Button>
+        </Grid>
+        {['+', '-', '/', 'x'].map((op) => (
+          <Grid item xs={3} key={op}>
+            <Button
+              onClick={() => handleOperation(op)}
+              variant="contained"
+              fullWidth
+            >
+              {op}
+            </Button>
+          </Grid>
+        ))}
+        <Grid item xs={6}>
+          <Button onClick={handleClear} variant="contained" fullWidth>
+            C
+          </Button>
+        </Grid>
+        <Grid item xs={6}>
+          <Button onClick={handleDelete} variant="contained" fullWidth>
+            DEL
+          </Button>
+        </Grid>
+      </Grid>
+    </Paper>
   )
 }
 
