@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { evaluate } from 'mathjs'
-import './App.css'
+import { evaluate } from './utils/math'
+
+import Whitespace from './components/Whitespace'
 import { Box, Button, Grid, Paper, Typography } from '@mui/material'
-import { KEYS } from './constants'
+import { KEYS, ERROR } from './constants'
+import './App.css'
 
 function App() {
   const [input, setInput] = useState('')
@@ -10,7 +12,9 @@ function App() {
   const [operation, setOperation] = useState('')
 
   const handleInput = (n: string) => {
-    if (input === '0' && n !== '.') {
+    if (input === ERROR) {
+      setInput(n)
+    } else if (input === '0' && n !== '.') {
       setInput(n)
     } else if (n === '.' && !input.includes('.')) {
       setInput(input + n)
@@ -37,49 +41,53 @@ function App() {
     setTotal(0)
   }
 
-  const handleOperation = (op) => {
+  const handleOperation = (op: string) => {
     if (input.length && input !== '0') {
       let newTotal = total
 
-      switch (op) {
-        case '+':
-        case '-':
-        case '/':
-        case 'x':
-          if (operation) {
-            newTotal = evaluate(`${newTotal}${operation}${input}`)
-          } else {
-            newTotal = parseFloat(input)
-          }
-          setOperation(op)
-          break
-
-        case '=':
-          if (operation) {
-            newTotal = evaluate(`${newTotal}${operation}${input}`)
-          } else {
-            newTotal = parseFloat(input)
-          }
-          setOperation('')
-          break
-
-        default:
-          break
+      if (operation) {
+        newTotal = evaluate(`${newTotal}${operation}${input}`)
+      } else {
+        newTotal = parseFloat(input)
       }
 
-      setTotal(newTotal)
-      setInput('0')
+      if (op === '=') {
+        setOperation('')
+      } else {
+        setOperation(op)
+      }
+
+      if (newTotal === null) {
+        // can handle this more elegantly...
+        setOperation('')
+        setTotal(0)
+        setInput(ERROR)
+      } else {
+        setTotal(newTotal)
+        setInput('0')
+      }
     }
   }
 
   return (
     <Paper elevation={3} sx={{ padding: 2, maxWidth: 300, margin: '0 auto' }}>
-      <Box mb={2} color={'grey'}>
+      <Box
+        mb={2}
+        sx={{
+          background: '#f2f2f2',
+          padding: '0.25em 0.35em 0.1em 0.25em',
+          border: 'solid 0.1em #e6e6e6',
+          borderRadius: '0.25em',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
         <Typography variant="h5" sx={{ textAlign: 'right' }}>
           {input || '0'}
         </Typography>
         <Typography variant="body2" sx={{ flexGrow: 1, textAlign: 'right' }}>
-          {total === 0 ? '0' : total + operation}
+          {total === 0 ? <Whitespace /> : total + ' ' + operation}
         </Typography>
       </Box>
       <Grid container spacing={1}>
